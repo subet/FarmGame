@@ -18,11 +18,20 @@
                 text-align: center;
             }
 
+
             button {
                 padding: 10px 20px;
-                border: solid 1px #bbbbbb;
+                border: solid 1px #cccccc;
                 background-color: #dddddd;
-                color: #000000;
+                color: #444444;
+                cursor: pointer;
+            }
+            
+            button:hover {
+                padding: 10px 20px;
+                border: solid 1px #002346;
+                background-color: #004080;
+                color: #ffffff;
                 cursor: pointer;
             }
             
@@ -34,30 +43,59 @@
 
             .farm div {
                 padding: 10px 20px;
-                border: solid 1px #bbbbbb;
+                border: solid 3px #bbbbbb;
                 background-color: #f0f0f0;
                 color: #000000;
                 display: inline-block;
             }
+
+            .farm div.fed {
+                border: solid 3px #008040;
+            }
         </style>
     </head>
     <body class="antialiased">
-        <div class="relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center py-4 sm:pt-0">
+        <div class="relative flex items-top justify-center bg-gray-100 dark:bg-gray-900 sm:items-center py-4 sm:pt-0">
             <div class="main">
                 <h1>Farm Game</h1>
                 
                 <p>Welcome to the farm game developed by Murat Dikici!</p>
+
+                @if(Session::exists('game_result') && Session::get('game_result')=='success')
+                <div class="mt-2">
+                    <strong>Congratulations, you won!</strong>
+                </div>
+                @endif
+
+                @if(Session::exists('game_result') && Session::get('game_result')=='fail')
+                <div class="mt-2">
+                    <strong>Sorry, you failed!</strong>
+                </div>
+                @endif
                 
                 <div class="mt-2">
                     <button id="btnStartGame" type="button">Start A New Game</button>
-                    @if(Session::exists('game_status') && Session::has('game_status')=='started')<button id="btnFeed" type="button">Feed</button>@endif
+                    @if(Session::exists('game_status') && Session::get('game_status')=='started')<button id="btnFeed" type="button">Feed</button>@endif
                 </div>
+
+                @if(Session::exists('total_turns') && Session::get('total_turns') > 0)
+                <div class="mt-2">
+                    Turn {{ Session::get('total_turns') }}
+                </div>
+                @endif
 
                 <div class="farm mt-4 @if(Session::missing('game_status') || Session::has('game_status')!='started') hidden @endif">
                     <h1>Your Farm</h1>
-                    <div>Farmer<br>{{ Session::get('farmer_count') }}</div>
-                    <div>Cow<br>{{ Session::get('cow_count') }}</div>
-                    <div>Bunny<br>{{ Session::get('bunny_count') }}</div>
+                    <div class="@if(Session::exists('last_feed') && Session::get('last_feed')=='farmer') fed @endif">Farmer<br>{{ Session::get('farmer_count') }}</div>
+                    <div class="@if(Session::exists('last_feed') && Session::get('last_feed')=='cow') fed @endif">Cow<br>{{ Session::get('cow_count') }}</div>
+                    <div class="@if(Session::exists('last_feed') && Session::get('last_feed')=='bunny') fed @endif">Bunny<br>{{ Session::get('bunny_count') }}</div>
+                </div>
+
+                <div>
+                    Farmer starve: @if(Session::exists('farmer_not_fed')) {{ Session::get('farmer_not_fed') }} @endif - 
+                    Cows starve: @if(Session::exists('cow_not_fed')) {{ Session::get('cow_not_fed') }} @endif - 
+                    Bunnies starve: @if(Session::exists('bunny_not_fed')) {{ Session::get('bunny_not_fed') }} @endif
+                    
                 </div>
             </div>
         </div>
@@ -65,12 +103,12 @@
     <script>
         document.getElementById('btnStartGame').onclick = function(e)
         {
-            parent.location.href='/start_game';
+            parent.location.href='/?do=start_game';
         }
 
         document.getElementById('btnFeed').onclick = function(e)
         {
-            parent.location.href='/feed';
+            parent.location.href='/?do=feed';
         }
     </script>
 </html>

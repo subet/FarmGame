@@ -4,15 +4,42 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Config;
+use App\Http\Controllers\Feeder;
+use App\Http\Controllers\WinControl;
+use App\Http\Controllers\Starver;
 
 class Game extends Controller
 {
     public function game(Request $request)
     {
 
-        if ($request->session()->missing('game_status'))
+        if (session()->missing('game_status'))
         {
             $this->initGame();
+        }
+
+        $winControl = new WinControl;
+        $feeder = new Feeder;
+        $starver = new Starver;
+
+        if ($request->has('do'))
+        {
+            switch($request->input('do'))
+            {
+                case "start_game":
+                    $this->startGame();
+                    break;
+
+                case "feed":
+                    $feeder->feed();
+                    $starver->starve();
+                    break;
+            }
+
+            $winControl->check();
+
+            return redirect('/');
+
         }
 
         return view("game");
@@ -29,7 +56,7 @@ class Game extends Controller
     }
 
 
-    public function startGame(Request $request)
+    public function startGame()
     {
         session(
             [
@@ -46,6 +73,7 @@ class Game extends Controller
                 'farmer_starve' => Config::get('constants.FARMER_STARVE'),
                 'cow_starve' => Config::get('constants.COW_STARVE'),
                 'bunny_starve' => Config::get('constants.BUNNY_STARVE'),
+                'game_result' => '',
             ]
         );
 
